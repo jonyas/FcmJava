@@ -3,12 +3,6 @@
 
 package de.bytefish.fcmjava.client.http.apache;
 
-import de.bytefish.fcmjava.client.http.IHttpClient;
-import de.bytefish.fcmjava.client.http.apache.utils.RetryHeaderUtils;
-import de.bytefish.fcmjava.client.utils.JsonUtils;
-import de.bytefish.fcmjava.client.utils.OutParameter;
-import de.bytefish.fcmjava.exceptions.*;
-import de.bytefish.fcmjava.http.options.IFcmClientSettings;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -23,7 +17,17 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
+
+import de.bytefish.fcmjava.client.http.IHttpClient;
+import de.bytefish.fcmjava.client.http.apache.utils.RetryHeaderUtils;
+import de.bytefish.fcmjava.client.utils.JsonUtils;
+import de.bytefish.fcmjava.client.utils.OutParameter;
+import de.bytefish.fcmjava.exceptions.FcmAuthenticationException;
+import de.bytefish.fcmjava.exceptions.FcmBadRequestException;
+import de.bytefish.fcmjava.exceptions.FcmCommunicationException;
+import de.bytefish.fcmjava.exceptions.FcmGeneralException;
+import de.bytefish.fcmjava.exceptions.FcmRetryAfterException;
+import de.bytefish.fcmjava.http.options.IFcmClientSettings;
 
 /**
  * This DefaultHttpClient is based on the Apache DefaultHttpClient.
@@ -153,7 +157,7 @@ public class DefaultHttpClient implements IHttpClient {
         if (httpStatusCode >= 500 && httpStatusCode < 600) {
 
             // Holds the Duration, which has been sent by the Server:
-            OutParameter<Duration> result = new OutParameter<>();
+            OutParameter<Long> result = new OutParameter<>();
 
             // Try to determine the next interval we can send at:
             if (RetryHeaderUtils.tryDetermineRetryDelay(httpResponse, result)) {

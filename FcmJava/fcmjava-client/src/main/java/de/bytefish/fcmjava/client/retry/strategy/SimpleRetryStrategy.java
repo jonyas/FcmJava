@@ -3,19 +3,20 @@
 
 package de.bytefish.fcmjava.client.retry.strategy;
 
+import java.util.concurrent.TimeUnit;
+
 import de.bytefish.fcmjava.client.functional.Action0;
 import de.bytefish.fcmjava.client.functional.Func1;
 import de.bytefish.fcmjava.exceptions.FcmRetryAfterException;
-import de.bytefish.fcmjava.http.options.IFcmClientSettings;
-
-import java.time.Duration;
 
 /**
- * The SimpleRetryStrategy retries all methods, that throw a @see {@link FcmRetryAfterException} for a
+ * The SimpleRetryStrategy retries all methods, that throw a @see {@link FcmRetryAfterException} for
+ * a
  * maximum number of retries.
  *
  * The @see {@link FcmRetryAfterException} includes a Retry Delay, which indicates when the method
- * should be retried. This Strategy waits for the amount of time given in the @see {@link FcmRetryAfterException}
+ * should be retried. This Strategy waits for the amount of time given in the @see {@link
+ * FcmRetryAfterException}
  * and waits for a fixed amount of time.
  */
 public class SimpleRetryStrategy implements IRetryStrategy {
@@ -23,15 +24,20 @@ public class SimpleRetryStrategy implements IRetryStrategy {
     private final int maxRetries;
 
     public SimpleRetryStrategy(int maxRetries) {
+
         this.maxRetries = maxRetries;
     }
 
     @Override
-    public void doWithRetry(Action0 action) {
-        getWithRetry(() -> {
-            action.invoke();
+    public void doWithRetry(final Action0 action) {
 
-            return null;
+        getWithRetry(new Func1<Object>() {
+            @Override
+            public Object invoke() {
+
+                action.invoke();
+                return null;
+            }
         });
     }
 
@@ -50,25 +56,26 @@ public class SimpleRetryStrategy implements IRetryStrategy {
                 returnValue = function.invoke();
                 // Break out of Loop, if there was no exception:
                 break;
-            } catch(FcmRetryAfterException e) {
+            } catch (FcmRetryAfterException e) {
                 currentRetryCount = currentRetryCount + 1;
                 // If we hit the maximum retry count, then throw the Exception:
-                if(currentRetryCount == maxRetries) {
+                if (currentRetryCount == maxRetries) {
                     throw e;
                 }
                 // Sleep for the amount of time returned by FCM:
-                internalSleep(e.getRetryDelay());
+                internalSleep(TimeUnit.MILLISECONDS, e.getRetryDelay());
             }
-        } while(currentRetryCount <= maxRetries);
+        } while (currentRetryCount <= maxRetries);
 
         // And finally return the result:
         return returnValue;
     }
 
-    private void internalSleep(Duration duration) {
+    private void internalSleep(TimeUnit timeUnit, long duration) {
+
         try {
-            Thread.sleep(duration.toMillis());
-        } catch(InterruptedException e) {
+            Thread.sleep(timeUnit.toMillis(duration));
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

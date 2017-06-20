@@ -3,10 +3,10 @@
 
 package de.bytefish.fcmjava.model.builders;
 
+import java.util.concurrent.TimeUnit;
+
 import de.bytefish.fcmjava.model.enums.PriorityEnum;
 import de.bytefish.fcmjava.model.options.FcmMessageOptions;
-
-import java.time.Duration;
 
 public class FcmMessageOptionsBuilder {
 
@@ -49,8 +49,8 @@ public class FcmMessageOptionsBuilder {
         return this;
     }
 
-    public FcmMessageOptionsBuilder setTimeToLive(Duration timeToLive) {
-        this.timeToLive = (int) timeToLive.getSeconds();
+    public FcmMessageOptionsBuilder setTimeToLive(TimeUnit timeUnit, long amount) {
+        this.timeToLive = (int) timeUnit.toSeconds(amount);
 
         return this;
     }

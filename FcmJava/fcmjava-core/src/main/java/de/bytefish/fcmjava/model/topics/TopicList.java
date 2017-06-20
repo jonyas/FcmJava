@@ -4,24 +4,28 @@
 package de.bytefish.fcmjava.model.topics;
 
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class TopicList {
 
     private final List<Topic> topics;
 
     public TopicList(List<Topic> topics) {
+
         this.topics = topics;
     }
 
     public List<Topic> getTopics() {
+
         return topics;
     }
 
     public String getTopicsCondition() {
-        return topics.stream()
-                .map(topic -> String.format("'%s' in topics", topic.getName()))
-                .collect(Collectors.joining(" || "));
+
+        StringBuilder sb = new StringBuilder();
+        for (Topic topic : topics) {
+            sb.append(String.format("'%s' in topics", topic.getName()));
+            sb.append(" || ");
+        }
+        return sb.toString();
     }
 }
